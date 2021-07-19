@@ -1,4 +1,4 @@
-#setwd("C:/Users/abrodlie/Department of Health and Social Care/NW029 - National Activity Product/QtrlyCaseMix")
+
 
 library(readxl)
 library(openxlsx)
@@ -34,13 +34,13 @@ SUSDataAcute <- SUSDataAcute %>% group_by(FinYear,Discharge_Month, Discharge_Yea
 InitialCheckAcute <- SUSDataAcute %>% group_by(FinYear,Dimention_1) %>% summarise(Activity = sum(Activity)) %>% pivot_wider(names_from = Dimention_1, values_from = Activity)
 
 
-save(Data/SUSDataAcute,file = "SUSDataAcute.Rda")
+save(SUSDataAcute,file = "Data/SUSDataAcute.Rda")
 
 write.table(InitialCheckAcute,"clipboard-16384",sep="\t")
 
 # Now load in the outpatient data
 
-OPdata <- read_csv("OPHRG2122M2.csv")
+OPdata <- read_csv("Data/OPHRG2122M2.csv")
 
 OPdata$FinYear <- ifelse(OPdata$Discharge_Month > 3, OPdata$Discharge_Year,OPdata$Discharge_Year - 1 ) 
 
@@ -52,7 +52,7 @@ OPDataAcute <- OPDataAcute %>% filter(PAT_Commissioner_Type != "Private Patient"
 
 OPDataAcute <- OPDataAcute %>% group_by(FinYear,Discharge_Month, Discharge_Year, Dimention_1,Dimention_7_HRG) %>% summarise(Activity = sum(adjusted), Spend = sum(Total_Cost_current)) 
 
-save(OPDataAcute,file = "OPDataAcute.Rda")
+save(OPDataAcute,file = "Data/OPDataAcute.Rda")
 
 InitialCheckOPAcute <- OPDataAcute %>% group_by(FinYear,Dimention_1) %>% summarise(Activity = sum(Activity)) %>% pivot_wider(names_from = Dimention_1
                             , values_from = Activity) 

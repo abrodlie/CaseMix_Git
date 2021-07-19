@@ -1,7 +1,5 @@
 #This code calculates the case-mix by month using principles of tidy data and reproducible analytical pipelines
 
-#setwd("C:/Users/abrodlie/Department of Health and Social Care/NW029 - National Activity Product/QtrlyCaseMix")
-
 library(readxl)
 library(openxlsx)
 library(tidyverse)
@@ -14,15 +12,15 @@ library(plotly)
 
 memory.limit(size = 56000)
 
-load("SUSDataAcute.Rda")
+load("Data/SUSDataAcute.Rda")
 
-RefCosts1819 <- read_excel("RefCosts1819.xlsx",1)
+RefCosts1819 <- read_excel("Data/RefCosts1819.xlsx",1)
 
-RefCosts1718 <- read_excel("RefCosts1718.xlsx",1)
+RefCosts1718 <- read_excel("Data/RefCosts1718.xlsx",1)
 
-RefCosts1617 <- read_excel("RefCosts1617.xlsx",1)
+RefCosts1617 <- read_excel("Data/RefCosts1617.xlsx",1)
 
-Tariff2021 <- read_excel("Tariff2021.xlsx",1)
+Tariff2021 <- read_excel("Data/Tariff2021.xlsx",1)
 
 #Rename two of the variables to make the code clearer
 
