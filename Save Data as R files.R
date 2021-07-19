@@ -1,4 +1,4 @@
-setwd("C:/Users/abrodlie/Department of Health and Social Care/NW029 - National Activity Product/QtrlyCaseMix")
+#setwd("C:/Users/abrodlie/Department of Health and Social Care/NW029 - National Activity Product/QtrlyCaseMix")
 
 library(readxl)
 library(openxlsx)
@@ -7,9 +7,9 @@ library(tidyverse)
 memory.limit(size = 56000)
 
 # Read in the data
-SUSData <- read_csv("APCHRG2122M2.csv")
+SUSData <- read_csv("Data/APCHRG2122M2.csv")
 
-save(SUSData, file = "SUSData.Rda")
+save(SUSData, file = "Data/SUSData.Rda")
 
 #load("J:/FPAEIG/FPMA/Analysis/Briefing and Reporting/Monthly CWA & Prody/National Activity Product/SR2020/SUSData.Rda")
 
@@ -17,7 +17,7 @@ save(SUSData, file = "SUSData.Rda")
 
 SUSDataNat <- SUSData %>% group_by(Discharge_Year ,Discharge_Month,Dimention_1,Dimention_7_HRG,adjusted) %>% summarise(Activity = sum(adjusted), Spend = sum(Total_Cost_current))
 
-save(SUSDataNat, file = "SUSDataNat.Rda")
+save(SUSDataNat, file = "Data/SUSDataNat.Rda")
 
 #Limits to what the JAR classes as acute organisations by limiting to just codes that start with R 
 
@@ -34,7 +34,7 @@ SUSDataAcute <- SUSDataAcute %>% group_by(FinYear,Discharge_Month, Discharge_Yea
 InitialCheckAcute <- SUSDataAcute %>% group_by(FinYear,Dimention_1) %>% summarise(Activity = sum(Activity)) %>% pivot_wider(names_from = Dimention_1, values_from = Activity)
 
 
-save(SUSDataAcute,file = "SUSDataAcute.Rda")
+save(Data/SUSDataAcute,file = "SUSDataAcute.Rda")
 
 write.table(InitialCheckAcute,"clipboard-16384",sep="\t")
 
