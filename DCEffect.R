@@ -1,9 +1,9 @@
 #Calculate the day case effect on productivity
 
 #Read in the reference costs data
-RefCosts1819OrdDC <- read_excel("RefCosts1819.xlsx",4)
+RefCosts1819OrdDC <- read_excel("Data/RefCosts1819.xlsx",4)
 
-#Select juts the ord and day case unit costs as this is all you need from the ref costs data
+#Select just the ord and day case unit costs as this is all you need from the ref costs data
 
 RefCosts1819OrdDC <- RefCosts1819OrdDC %>% select(Currency, `Elective Unit Cost`,`Day Case Unit Cost` ) %>% rename(OrdUC = `Elective Unit Cost`,DCUC = `Day Case Unit Cost` )
 
@@ -69,12 +69,44 @@ SummaryOutput <- Summary %>% filter(FinYear != 2014) %>% select(FinYear,DCEffect
 
 write.table(SummaryOutput ,"clipboard-16384",sep="\t")
 
+#Produce a high level table of day case rates
+
+rm(DayCaseRatesTimeSeries)
+
+DayCaseRatesTimeSeries <- ElecDataAnn %>% group_by(FinYear) %>% summarise(DC = sum(DC), Ord = sum(Ord)) %>% filter(!FinYear %in% c(2020,2021 )) %>% mutate(DCRate = DC/(Ord+DC), FinYear = paste(FinYear - 2000,"/",FinYear - 1999, sep="", collapse=NULL)) 
+
 #Now try and work out what it means in terms of day case numbers
 
 ElecDataAnnVol <- ElecDataAnn %>% mutate(DCCurrentRateNoError = DC*CostExist*PriorExist , DCPriorRateNoError = DCPriorRate*CostExist*PriorExist ) 
 
 ElecDataAnnVolByYear <- ElecDataAnnVol %>% group_by(FinYear) %>% summarise(DCCurrentRate = sum(DCCurrentRateNoError, is.na = TRUE), 
         DCPriorRate = sum(DCPriorRateNoError, na.rm = TRUE), DCTotal = sum(DC))  %>% mutate(ExtraDCs = DCCurrentRate - DCPriorRate, DCIncrease = DCCurrentRate - lag(DCCurrentRate), DCTotalIncrease = DCTotal - lag(DCTotal)) 
+
+#Now look at an alternative way of calculating the DC Rate
+
+#Need the total by year to calculate % of activity in each HRG
+
+TotalbyYear <- ElecDataAnn %>% group_by(FinYear) %>% summarise(TotalAllHRGs = sum(Total))
+
+#Selects the columns needed from ElecDataAnn
+AlternCalc <- ElecDataAnn %>% select(HRG,FinYear,DC,Ord,Total,DCrate,PriorDCRate) 
+
+#Adds the totals by year so can then calculate the proportion by HRG
+AlternCalc <- left_join(AlternCalc,TotalbyYear, by = "FinYear")
+
+#Calculate a perc of all activity for each HRG and then calculate the DCRate times this percent for each HRG as the sum should give the overall day case rate (we already know this but is a good check of methodology)
+AlternCalc <- AlternCalc %>% mutate(PercOfAll = Total/TotalAllHRGs, DCTimesPerc = DCrate*PercOfAll  )
+
+#Then move on to the groundwork for calculating the DC Rate if it was the prior profile of activity but the current daycase rates.
+
+AlternCalc <- AlternCalc %>% mutate(PriorPercofAll = lag(PercOfAll), PriorPercofAll = if_else(is.na(PriorPercofAll),0,PriorPercofAll) ,  
+                                    PriorPercTimesDCRate = PriorPercofAll*DCrate, PriorTotal = lag(Total))
+
+#To compare with the prior DC rates but the existing proportion of activity
+
+AlternCalc <- AlternCalc %>% mutate(PriorDCRate = if_else(is.na(PriorDCRate),0,PriorDCRate) , PriorDCRateTimesPerc = PriorDCRate*PercOfAll)
+
+AlternTimeSeries <- AlternCalc %>% group_by(FinYear) %>% summarise( DCratebyyear = sum(DCTimesPerc) , DCrateoldperc = sum(PriorPercTimesDCRate), DataUsed = sum(PriorPercofAll) ,PercPriorDCRate = sum(PriorDCRateTimesPerc) )
 
 #Now look at a national level not HRG to see how much it takes to change the 
 
@@ -90,6 +122,10 @@ NatUnitCosts <- NatUnitCosts %>% group_by(FinYear) %>% summarise(DC = sum(DC), D
 
 NonHRGSummary <- NatUnitCosts  %>%  filter(FinYear != 2014) %>%  select( FinYear, DCEffect ) %>% mutate(DCEffect = scales::percent_format(0.1)( DCEffect) , FinYear = paste(FinYear - 2000,"/",FinYear - 1999, sep="", collapse=NULL)) 
 
-saveRDS(SummaryOutput, file = "SummaryOutput.RDS")
+saveRDS(SummaryOutput, file = "Markdowns/SummaryOutput.RDS")
 
-saveRDS(NonHRGSummary, file = "NonHRGSummary.RDS")
+saveRDS(NonHRGSummary, file = "Markdowns/NonHRGSummary.RDS")
+
+saveRDS(DayCaseRatesTimeSeries, file = "Markdowns/DayCaseRatesTimeSeries.RDS")
+
+saveRDS(AlternTimeSeries, file = "Markdowns/AlternTimeSeries.RDS")
