@@ -72,4 +72,15 @@ for(trace in looper){
 
 fig 
 
+#Produce a chart which shows pandemic vs pre-pandemic levels
 
+PandvPre <- UCbyM %>% select(FinYear, FinMonth,UCI) %>% mutate(PrePandComp = case_when(
+  FinYear == 2020 & FinMonth <12 ~ UCI/lag(UCI,12)-1,
+  FinYear == 2021 & FinMonth <12 ~ UCI/lag(UCI,24)-1,
+  FinYear == 2020 & FinMonth == 12 ~ UCI/lag(UCI,24)-1
+  )) %>% filter(FinYear > 2019) %>% mutate(CalMonth =if_else(FinMonth < 10 , FinMonth+3,FinMonth-9), CalYear=if_else(FinMonth < 10 , FinYear,FinYear+1) ) %>% mutate(X = as.Date(paste("01",CalMonth,CalYear), format = "%d %m %Y"))
+  
+PrePandCompChart <- plot_ly(PandvPre, x = ~X, y = ~ PrePandComp, type = 'scatter',
+                            mode = 'lines')
+
+        

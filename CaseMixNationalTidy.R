@@ -104,6 +104,10 @@ MTHEL2018C_Chart <- fig
 
 MTHEL2018C_Chart <- MTHEL2018C_Chart %>% layout(title="Elective Case-Mix")
 
+PrePandCompChartEL <- PrePandCompChart
+
+PrePandCompChartEL <- PrePandCompChartEL %>% layout(title="Elective Case-Mix vs Pre-Pandemic Level")
+
 #Now do non-electives
 
 MthlyNEL <- SUSDataAcuteC %>% filter(PoDh == "NEL") %>% mutate(FinMonth = if_else(Discharge_Month < 4 , Discharge_Month + 9, Discharge_Month -3)
@@ -142,10 +146,18 @@ MTHNEL2018C_Chart <- fig
 
 MTHNEL2018C_Chart <- MTHNEL2018C_Chart %>% layout(title="Non-Elective Case-Mix")
 
-write.table(MTHEL2018C,"clipboard-16384",sep="\t")
+PrePandCompChartNEL <- PrePandCompChart
+
+PrePandCompChartNEL <- PrePandCompChartNEL %>% layout(title="Non-Elective Case-Mix vs Pre-Pandemic Level")
+
+write.table(MTHNEL2018C,"clipboard-16384",sep="\t")
 
 
 saveRDS(MTHEL2018C_Chart, file = "ELCharts.RDS")
 saveRDS(MTHNEL2018C_Chart, file = "NELCharts.RDS")
+
+saveRDS(PrePandCompChartEL, file = "ELChart2.RDS")
+saveRDS(PrePandCompChartNEL, file = "NELChart2.RDS")
+
 
 MTHNEL2018C_Chart
